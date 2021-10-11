@@ -8,34 +8,76 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
 {
 #if UNITY_IOS
     private string gameID = "4397880";
-    private string myPlacementID = "Rewarded_iOS";
+    private string rewardedPlacementID = "Rewarded_iOS";
+    private string bannerPlacementID = "Banner_iOS";
 #elif UNITY_ANDROID
     private string gameID = "4397881";
     private string rewardedPlacementID = "Rewarded_Android";
+    private string bannerPlacementID = "Banner_Android";
 #endif
 
-    public Button rewardedBtn;
+    [Header("激励广告按钮")]
+    public Button rewardedAdsBtn;
+    [Header("全屏广告按钮")]
+    public Button fullScreenAdsBtn;
 
     private void Start()
     {
         Advertisement.AddListener(this);
         Advertisement.Initialize(gameID, true);
 
-        rewardedBtn.onClick.AddListener(ShowRewardedVideo);
-        rewardedBtn.interactable = Advertisement.IsReady(rewardedPlacementID);
+        SetAdsBtnsReady();
+    }
+
+    private void SetAdsBtnsReady()
+    {
+        rewardedAdsBtn.onClick.AddListener(ShowRewardedAdsVideo);
+        rewardedAdsBtn.interactable = Advertisement.IsReady(rewardedPlacementID);
+
+        fullScreenAdsBtn.onClick.AddListener(ShowFullScreenAdsVideo);
+
+        StartCoroutine(SetBannerAdsReady());
     }
 
     /// <summary>
     /// 展示激励广告
     /// </summary>
-    public void ShowRewardedVideo()
+    private void ShowRewardedAdsVideo()
     {
         Advertisement.Show(rewardedPlacementID);
     }
 
+    /// <summary>
+    /// 展示全屏广告
+    /// </summary>
+    private void ShowFullScreenAdsVideo()
+    {
+        Advertisement.Show();
+    }
+
+    /// <summary>
+    /// 展示横幅广告
+    /// </summary>
+    private void ShowBannerAds()
+    {
+        Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
+        Advertisement.Banner.Show(bannerPlacementID);
+    }
+
+    private IEnumerator SetBannerAdsReady()
+    {
+        var sec = new WaitForSeconds(0.5f);
+        while (!Advertisement.IsReady(bannerPlacementID))
+        {
+            yield return sec;
+        }
+
+        ShowBannerAds();
+    }
+
     public void OnUnityAdsReady(string placementId)
     {
-        rewardedBtn.interactable = Advertisement.IsReady(rewardedPlacementID);
+        rewardedAdsBtn.interactable = Advertisement.IsReady(rewardedPlacementID);
         Debug.Log("ad ready");
     }
 
